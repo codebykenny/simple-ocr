@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Simple OCR</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700" rel="stylesheet">
-    
+
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
       <script>
@@ -13,6 +13,8 @@
     <% } %>
   </head>
   <body>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+
     <div id="app"></div>
     <!-- Set `__static` path to static files in production -->
     <script>

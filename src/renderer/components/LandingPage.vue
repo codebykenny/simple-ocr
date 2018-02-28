@@ -1,9 +1,17 @@
 <template>
   <div id="wrapper">
+    <div class="top-right">
+      <button @click="toggleSettings()"><i class="fas fa-sliders-h"></i></button>
+    </div>
+
     <div class="top">
       <div class="page-title">
-        Simple OCR 1.0.11
+        Simple OCR
       </div>
+
+
+      <settings-dropdown :mode="mode" :changeMode="changeMode" v-if="showSettings == true"></settings-dropdown>
+
       <div class="drag-area">
         <div class="input-wrapper">
           <input id="file" @change="dropped" type="file" />
@@ -17,7 +25,13 @@
       </p>
     </div>
 
-    <div class="result" v-html="ocrdText"></div>
+    <div class="result">
+      <div class="normal" v-if="mode == 'normal'" v-html="ocrdText"></div>
+      <div class="paragraph" v-if="mode == 'paragraph'">
+        <p v-for="p in paragraphs">{{p.text}}</p>
+      </div>
+      <div class="block" v-if="mode == 'block'" v-html="ocrdText"></div>
+    </div>
 
     <div v-if="ocrdText.length > 0" class="bottom">
       <button @click="reset()">Reset</button>
@@ -26,6 +40,7 @@
 </template>
 
 <script>
+  import SettingsDropdown from './LandingPage/SettingsDropdown.vue'
   import Tesseract from 'tesseract.js'
   const path = require("path")
   const { dialog } = require('electron').remote
@@ -38,19 +53,22 @@
       return {
         ocrdText: '',
         status: '',
-        progress: 0
+        progress: 0,
+        paragraphs: [],
+        mode: 'normal',
+        showSettings: false
       }
     },
     methods: {
       reset () {
-        this.ocrdText = '';
-        this.status = '';
-        this.progress = 0;
+        this.ocrdText = ''
+        this.status = ''
+        this.progress = 0
         this.setWindowSize(true)
       },
       dropped (e) {
-        let _this = this;
-        let file = e.target.files[0].path;
+        let _this = this
+        let file = e.target.files[0].path
 
         console.log('processing...')
 
@@ -70,12 +88,20 @@
             }
           })
           .then(function(result){
+            console.log(result)
             _this.ocrdText = result.text
+            _this.paragraphs = result.paragraphs
             _this.setWindowSize()
           })
           .catch(e => {
             console.log(e)
           })
+      },
+      toggleSettings () {
+        this.showSettings = !this.showSettings
+      },
+      changeMode (mode) {
+        this.mode = mode
       },
       setWindowSize (small) {
         setTimeout(function () {
@@ -90,7 +116,8 @@
       // Uncomment to Force developers tools on production
       // var window = remote.getCurrentWindow()
       // window.openDevTools()
-    }
+    },
+    components: { SettingsDropdown }
   }
 </script>
 
@@ -115,6 +142,30 @@
     padding-bottom: 10px;
 
     -webkit-app-region: drag;
+  }
+
+  .top-right {
+    position: absolute;
+    top: -2px;
+    right: 0px;
+    z-index: 2;
+  }
+
+  .top-right button {
+    font-size: 14px;
+    cursor: pointer;
+    border: 0px;
+    background: clear;
+    padding: 0px 2px;
+    transition: all 0.25s ease;
+  }
+
+  .top-right button:focus {
+    outline: none;
+  }
+
+  .top-right button:hover {
+    color: #e4e4e4;
   }
 
   .drag-area {
@@ -144,9 +195,12 @@
 
   .result {
     max-width: 100%;
-    white-space: pre-line;
     padding: 160px 20px 20px 20px;
     font-size: 12px;
+  }
+
+  .result .normal {
+    white-space: pre-line;
   }
 
   .bottom {
