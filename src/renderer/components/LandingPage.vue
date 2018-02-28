@@ -1,10 +1,10 @@
 <template>
   <div id="wrapper">
-    <div class="top-right">
-      <button @click="toggleSettings()"><i class="fas fa-sliders-h"></i></button>
-    </div>
 
     <div class="top">
+      <div class="top-right">
+        <button @click="toggleSettings()"><i class="fas fa-sliders-h"></i></button>
+      </div>
       <div class="page-title">
         Simple OCR
       </div>
@@ -146,8 +146,8 @@
 
   .top-right {
     position: absolute;
-    top: -2px;
-    right: 0px;
+    top: 5px;
+    right: 4px;
     z-index: 2;
   }
 
