@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -33,7 +33,32 @@ function createWindow () {
   })
 }
 
-app.on('ready', createWindow)
+let template = []
+if (process.platform === 'darwin') {
+  // OS X
+  const name = app.getName();
+  template.unshift({
+    label: name,
+    submenu: [
+      {
+        label: 'About ' + name,
+        role: 'about'
+      },
+      {
+        label: 'Quit',
+        accelerator: 'Command+Q',
+        click() { app.quit(); }
+      },
+    ]
+  })
+}
+
+app.on('ready', () => {
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+
+  createWindow()
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -57,9 +82,15 @@ app.on('activate', () => {
 
 import { autoUpdater } from 'electron-updater'
 
-// autoUpdater.on('update-downloaded', () => {
-//   autoUpdater.quitAndInstall()
-// })
+autoUpdater.on('update-downloaded', () => {
+  console.log('wow');
+  // autoUpdater.quitAndInstall()
+})
+
+autoUpdater.on('error', (e) => {
+  console.log('wow', e);
+})
+
 
 app.on('ready', () => {
   autoUpdater.checkForUpdatesAndNotify()
