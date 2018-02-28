@@ -1,6 +1,6 @@
 {
   "name": "simple-ocr",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "Kenneth <kennysmoothx@users.noreply.github.com>",
   "description": "An electron-vue project",
   "license": null,
