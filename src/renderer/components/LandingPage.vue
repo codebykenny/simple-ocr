@@ -2,7 +2,7 @@
   <div id="wrapper">
     <div class="top">
       <div class="page-title">
-        Simple OCR
+        Simple OCR 1.0.1
       </div>
       <div class="drag-area">
         <div class="input-wrapper">
