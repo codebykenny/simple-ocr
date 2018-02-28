@@ -3,7 +3,7 @@
 > An electron-vue project
 
 <div align="center">
-    <img src="https://i.imgur.com/f0U2adZ.png" width="500px">
+    <img src="https://i.imgur.com/f0U2adZ.png" width="600px">
 </div>
 
 #### Build Setup
