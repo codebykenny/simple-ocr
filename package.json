@@ -1,6 +1,6 @@
 {
   "name": "simple-ocr",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "author": "Kenneth <kennysmoothx@users.noreply.github.com>",
   "description": "An electron-vue project",
   "license": null,
@@ -55,7 +55,6 @@
       ]
     },
     "win": {
-      "target": "portable",
       "icon": "build/icons/icon.ico",
       "publish": [
         "github"
