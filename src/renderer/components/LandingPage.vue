@@ -42,6 +42,8 @@
 <script>
   import SettingsDropdown from './LandingPage/SettingsDropdown.vue'
   import Tesseract from 'tesseract.js'
+  import db from '../database'
+
   const path = require("path")
   const { dialog } = require('electron').remote
   const remote = require('electron').remote
@@ -102,6 +104,10 @@
       },
       changeMode (mode) {
         this.mode = mode
+        db.settings.put({
+          'key': 'mode',
+          'value': mode
+        })
       },
       setWindowSize (small) {
         setTimeout(function () {
@@ -114,8 +120,14 @@
       this.setWindowSize(true)
 
       // Uncomment to Force developers tools on production
-      var window = remote.getCurrentWindow()
-      window.openDevTools()
+      // var window = remote.getCurrentWindow()
+      // window.openDevTools()
+
+      db.settings.get({'key': 'mode'}, mode => {
+        if (mode) {
+          this.mode = mode.value
+        }
+      })
     },
     components: { SettingsDropdown }
   }
