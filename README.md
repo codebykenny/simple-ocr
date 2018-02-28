@@ -2,6 +2,10 @@
 
 > An electron-vue project
 
+<div align="center">
+    <img src="https://i.imgur.com/f0U2adZ.png" width="500px">
+</div>
+
 #### Build Setup
 
 ``` bash
