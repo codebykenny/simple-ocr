@@ -74,6 +74,8 @@ app.on('activate', () => {
  */
 
 import { autoUpdater } from 'electron-updater'
+autoUpdater.logger = require("electron-log")
+autoUpdater.logger.transports.file.level = "info"
 
 app.on('ready', () => {
   autoUpdater.checkForUpdatesAndNotify()
