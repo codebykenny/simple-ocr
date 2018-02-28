@@ -114,8 +114,8 @@
       this.setWindowSize(true)
 
       // Uncomment to Force developers tools on production
-      // var window = remote.getCurrentWindow()
-      // window.openDevTools()
+      var window = remote.getCurrentWindow()
+      window.openDevTools()
     },
     components: { SettingsDropdown }
   }

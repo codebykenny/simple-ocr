@@ -74,7 +74,7 @@ app.on('activate', () => {
  * support auto updating. Code Signing with a valid certificate is required.
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
  */
-
+const os = require('os')
 import { autoUpdater } from 'electron-updater'
 autoUpdater.logger = require("electron-log")
 autoUpdater.logger.transports.file.level = "info"
@@ -82,8 +82,10 @@ autoUpdater.logger.transports.file.level = "info"
 app.on('ready', () => {
   autoUpdater.checkForUpdatesAndNotify()
 
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
+  if (os.platform == 'darwin') {
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+  }
 
   createWindow()
 })
