@@ -1,6 +1,4 @@
-# Simple Ocr
-
-> An electron-vue project
+# Simple OCR
 
 <div align="center">
     <img src="https://i.imgur.com/f0U2adZ.png" width="600px">
