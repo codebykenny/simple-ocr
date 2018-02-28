@@ -53,13 +53,6 @@ if (process.platform === 'darwin') {
   })
 }
 
-app.on('ready', () => {
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
-
-  createWindow()
-})
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -82,16 +75,11 @@ app.on('activate', () => {
 
 import { autoUpdater } from 'electron-updater'
 
-autoUpdater.on('update-downloaded', () => {
-  console.log('wow');
-  // autoUpdater.quitAndInstall()
-})
-
-autoUpdater.on('error', (e) => {
-  console.log('wow', e);
-})
-
-
 app.on('ready', () => {
   autoUpdater.checkForUpdatesAndNotify()
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+
+  createWindow()
 })
