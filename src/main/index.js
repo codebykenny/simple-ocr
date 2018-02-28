@@ -57,10 +57,10 @@ app.on('activate', () => {
 
 import { autoUpdater } from 'electron-updater'
 
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
-})
+// autoUpdater.on('update-downloaded', () => {
+//   autoUpdater.quitAndInstall()
+// })
 
 app.on('ready', () => {
-  if (process.env.NODE_ENV !== 'development') autoUpdater.checkForUpdates()
+  autoUpdater.checkForUpdatesAndNotify()
 })
