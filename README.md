@@ -2,8 +2,10 @@
 
 <div align="center">
     <img src="https://i.imgur.com/f0U2adZ.png" width="600px">
-    
-    <p>An open-sourced OCR Application that uses Tesseract OCR.</p>
+</div>
+
+<div align="center">
+    An open-sourced OCR Application that uses Tesseract OCR.
 </div>
 
 #### Build Setup
