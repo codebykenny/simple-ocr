@@ -13,15 +13,16 @@
       <settings-dropdown :mode="mode" :changeMode="changeMode" v-if="showSettings == true"></settings-dropdown>
 
       <div class="drag-area">
-        <div class="input-wrapper">
+        <div v-if="running == false" class="input-wrapper">
           <input id="file" @change="dropped" type="file" />
           <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
         </div>
+
+        <div v-show="running == true" id="progress"></div>
       </div>
 
       <p v-if="status.length > 0" class="text-center" style="font-size: 12px; padding: 0; margin: 0;">
         <strong>{{status}}</strong>
-        <span>{{progress}} %</span>
       </p>
     </div>
 
@@ -44,6 +45,7 @@
   import Tesseract from 'tesseract.js'
   import db from '../database'
 
+  const ProgressBar = require('progressbar.js')
   const path = require("path")
   const { dialog } = require('electron').remote
   const remote = require('electron').remote
@@ -53,9 +55,11 @@
     components: { },
     data () {
       return {
+        running: false,
         ocrdText: '',
         status: '',
         progress: 0,
+        progressBar: {},
         paragraphs: [],
         mode: 'normal',
         showSettings: false
@@ -76,6 +80,8 @@
 
         this.reset()
         this.status = 'Starting...'
+        this.running = true
+        this.startProgressBar()
 
         Tesseract.create({
             workerPath: path.join(__static, '/tesseract/src/node/worker.js'),
@@ -87,16 +93,23 @@
 
             if (p.progress) {
               _this.progress = (p.progress * 100).toFixed(2)
+
+              if (p.status == 'recognizing text') {
+                _this.progressBar.animate(p.progress);
+              }
             }
           })
           .then(function(result){
-            console.log(result)
             _this.ocrdText = result.text
             _this.paragraphs = result.paragraphs
             _this.setWindowSize()
+            _this.running = false
+            _this.progressBar.destroy()
+            _this.status = 'Done'
           })
           .catch(e => {
             console.log(e)
+            _this.running = false
           })
       },
       toggleSettings () {
@@ -108,6 +121,40 @@
           'key': 'mode',
           'value': mode
         })
+      },
+      startProgressBar () {
+          let _this = this
+
+          this.progressBar = new ProgressBar.Circle('#progress', {
+            color: '#00de7b',
+            // This has to be the same size as the maximum width to
+            // prevent clipping
+            strokeWidth: 3,
+            trailWidth: 2,
+            easing: 'easeInOut',
+            duration: 100,
+            text: {
+              autoStyleContainer: false
+            },
+            from: { color: '#29a56d', width: 3 },
+            to: { color: '#00de7b', width: 3 },
+            // Set default step function for all animate calls
+            step: function(state, circle) {
+              circle.path.setAttribute('stroke', state.color);
+              circle.path.setAttribute('stroke-width', state.width);
+
+              var value = Math.round(circle.value() * 100);
+              if (value === 0) {
+                circle.setText('');
+              } else {
+                circle.setText(value);
+              }
+
+              }
+          });
+
+          this.progressBar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+          this.progressBar.text.style.fontSize = '2rem';
       },
       setWindowSize (small) {
         setTimeout(function () {
@@ -264,5 +311,12 @@
 
   button:hover {
     background: #28343c;
+  }
+
+  #progress {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    text-align: center;
   }
 </style>
