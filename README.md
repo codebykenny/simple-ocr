@@ -1,14 +1,11 @@
-# Simple OCR
+<p align="center">
+  <img src="https://i.imgur.com/f0U2adZ.png" width="600px">
+  <h3 align="center">Simple OCR</h3>
+  <p align="center">An open-sourced OCR Application that uses Tesseract OCR.<p>
+  <p align="center"><a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a></p>
+</p>
 
-<div align="center">
-    <img src="https://i.imgur.com/f0U2adZ.png" width="600px">
-</div>
-
-<div align="center">
-    An open-sourced OCR Application that uses Tesseract OCR.
-</div>
-
-#### Build Setup
+### Build Setup
 
 ``` bash
 # install dependencies
