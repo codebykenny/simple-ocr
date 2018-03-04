@@ -3,7 +3,8 @@
 
     <div class="top">
       <div class="top-right">
-        <button @click="toggleSettings()"><i class="fas fa-sliders-h"></i></button>
+        <button v-if="ocrdText.length > 0" @click="reset()"><i class="fas fa-redo"></i></button>
+        <button @click="toggleSettings()"><i class="fas fa-cog"></i></button>
       </div>
       <div class="page-title">
         Simple OCR
@@ -12,7 +13,7 @@
 
       <settings-dropdown :mode="mode" :changeMode="changeMode" v-if="showSettings == true"></settings-dropdown>
 
-      <div class="drag-area">
+      <div class="drag-area" :class="{'running': running}">
         <div v-if="running == false" class="input-wrapper">
           <input id="file" @change="dropped" type="file" />
           <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
@@ -21,8 +22,8 @@
         <div v-show="running == true" id="progress"></div>
       </div>
 
-      <p v-if="status.length > 0" class="text-center" style="font-size: 12px; padding: 0; margin: 0;">
-        <strong>{{status}}</strong>
+      <p v-if="status.length > 0" class="footer text-center" style="font-size: 12px; padding: 0; margin: 0;">
+        {{status}}
       </p>
     </div>
 
@@ -32,10 +33,6 @@
         <p v-for="p in paragraphs">{{p.text}}</p>
       </div>
       <div class="block" v-if="mode == 'block'" v-html="ocrdText"></div>
-    </div>
-
-    <div v-if="ocrdText.length > 0" class="bottom">
-      <button @click="reset()">Reset</button>
     </div>
   </div>
 </template>
@@ -49,6 +46,7 @@
   const path = require("path")
   const { dialog } = require('electron').remote
   const remote = require('electron').remote
+  const ipcRenderer = require('electron').ipcRenderer
 
   export default {
     name: 'landing-page',
@@ -57,7 +55,7 @@
       return {
         running: false,
         ocrdText: '',
-        status: '',
+        status: 'Waiting for file..',
         progress: 0,
         progressBar: {},
         paragraphs: [],
@@ -68,6 +66,7 @@
     methods: {
       reset () {
         this.ocrdText = ''
+        this.paragraphs = []
         this.status = ''
         this.progress = 0
         this.setWindowSize(true)
@@ -76,7 +75,18 @@
         let _this = this
         let file = e.target.files[0].path
 
-        console.log('processing...')
+        console.log('processing...', e.target.files[0])
+
+        if (e.target.files[0].type.indexOf('image') == -1) {
+          dialog.showMessageBox({
+            type: 'error',
+            title: 'Whoops..',
+            message: 'Whoops..',
+            detail: 'Can only handle image files at this time..',
+            buttons: ['OK']})
+
+          return
+        }
 
         this.reset()
         this.status = 'Starting...'
@@ -95,7 +105,7 @@
               _this.progress = (p.progress * 100).toFixed(2)
 
               if (p.status == 'recognizing text') {
-                _this.progressBar.animate(p.progress);
+                _this.progressBar.animate(p.progress)
               }
             }
           })
@@ -126,40 +136,43 @@
           let _this = this
 
           this.progressBar = new ProgressBar.Circle('#progress', {
-            color: '#00de7b',
-            // This has to be the same size as the maximum width to
-            // prevent clipping
+            color: '#60c0f5',
             strokeWidth: 3,
             trailWidth: 2,
             easing: 'easeInOut',
-            duration: 100,
+            trailColor: '#797979',
+            duration: 700,
             text: {
               autoStyleContainer: false
             },
-            from: { color: '#29a56d', width: 3 },
-            to: { color: '#00de7b', width: 3 },
-            // Set default step function for all animate calls
+            from: { color: '#60c0f5', width: 3 },
+            to: { color: '#60c0f5', width: 3 },
             step: function(state, circle) {
-              circle.path.setAttribute('stroke', state.color);
-              circle.path.setAttribute('stroke-width', state.width);
+              circle.path.setAttribute('stroke', state.color)
+              circle.path.setAttribute('stroke-width', state.width)
 
-              var value = Math.round(circle.value() * 100);
+              var value = Math.round(circle.value() * 100)
               if (value === 0) {
-                circle.setText('');
+                circle.setText('')
               } else {
-                circle.setText(value);
+                circle.setText(value)
               }
 
               }
-          });
+          })
 
-          this.progressBar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
-          this.progressBar.text.style.fontSize = '2rem';
+          this.progressBar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif'
+          this.progressBar.text.style.fontSize = '2rem'
+
+          setTimeout(() => {
+            this.setWindowSize(true)
+          }, 500)
       },
       setWindowSize (small) {
         setTimeout(function () {
           var window = remote.getCurrentWindow()
-          window.setContentSize(small ? 470 : 600, document.getElementsByTagName('html')[0].offsetHeight)
+
+          ipcRenderer.send('resizeWindow', [small ? 470 : 600, document.getElementsByTagName('html')[0].offsetHeight])
         }, 100)
       }
     },
@@ -192,13 +205,11 @@
 
   .top {
     background: white;
+    left: 0;
+    padding-top: 20px;
     position: fixed;
     top: 0;
-    left: 0;
     width: 100%;
-    border-bottom: 1px solid whitesmoke;
-    padding-top: 20px;
-    padding-bottom: 10px;
 
     -webkit-app-region: drag;
   }
@@ -228,15 +239,27 @@
   }
 
   .drag-area {
-    text-align: center;
-    position: relative;
-    display: block;
-    padding: 24px 20px;
-    justify-content: center;
     align-content: center;
-    border: 2px dashed #989898;
-    /* border-radius: 20px; */
-    margin: 20px;
+    border-radius: 8px;
+    border: 2px dashed rgba(255, 255, 255, 0.43);
+    display: block;
+    justify-content: center;
+    margin: 20px 20px 10px;
+    padding: 66px 20px;
+    position: relative;
+    text-align: center;
+    transition: all 0.25s ease;
+  }
+
+  .drag-area:hover {
+    border-color: #60c0f5;
+    color: #60c0f5;
+    margin: 20px 18px 10px;
+    padding: 68px 20px;
+  }
+
+  .drag-area.running {
+    padding: 26px 20px;
   }
 
   .drag-area.ran {
@@ -254,7 +277,7 @@
 
   .result {
     max-width: 100%;
-    padding: 160px 20px 20px 20px;
+    padding: 200px 20px 20px 20px;
     font-size: 12px;
   }
 
@@ -262,9 +285,12 @@
     white-space: pre-line;
   }
 
+  .result .block {
+    padding: 5px;
+  }
+
   .bottom {
     text-align: center;
-    /* position: absolute; */
     width: 100%;
     bottom: 0;
     left: 0;
@@ -276,7 +302,6 @@
 
   .top {
     background: #1b2429;
-    border-bottom: 1px solid #2a323a;
     color: white;
   }
 
@@ -287,25 +312,25 @@
   .page-title {
     color: white;
     font-size: 12px;
-    position: absolute;
+    font-weight: 500;
+    left: 0;
+    letter-spacing: 0.6px;
     margin-left: auto;
     margin-right: auto;
-    left: 0;
+    position: absolute;
     right: 0;
     top: 8px;
-    font-weight: 500;
     width: 85px;
-    letter-spacing: 0.6px;
   }
 
   button {
-    cursor: pointer;
-    border: 1px solid white;
     background: none;
-    color: white;
-    padding: 5px 10px;
-    font-size: 13px;
     border-radius: 5px;
+    border: 1px solid white;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 5px 10px;
     transition: all 0.25s ease;
   }
 
@@ -314,9 +339,21 @@
   }
 
   #progress {
-    width: 100px;
     height: 100px;
     margin: 0 auto;
     text-align: center;
+    width: 100px;
+  }
+
+  .footer {
+    background: #1b2429;
+    bottom:6px;
+    font-size: 11px;
+    font-weight: bold;
+    left: 0px;
+    letter-spacing: 1px;
+    position: fixed;
+    right: 0px;
+    text-transform: capitalize;
   }
 </style>

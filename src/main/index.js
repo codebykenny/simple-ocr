@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from 'electron'
+import { app, BrowserWindow, Menu, ipcMain } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -18,7 +18,8 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    maxHeight: 500,
+    backgroundColor: '#1b2429',
+    maxHeight: 1000,
     useContentSize: true,
     maxWidth: 600,
     width: 470,
@@ -65,6 +66,10 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
   }
+})
+
+ipcMain.on('resizeWindow', (event, size) => {
+  mainWindow.setSize(size[0], size[1], true)
 })
 
 /**
