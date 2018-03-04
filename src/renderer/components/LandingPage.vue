@@ -10,10 +10,9 @@
         Simple OCR
       </div>
 
-
       <settings-dropdown :mode="mode" :changeMode="changeMode" v-if="showSettings == true"></settings-dropdown>
 
-      <div class="drag-area" :class="{'running': running}">
+      <div class="drag-area" :class="{'running': running, 'ran': ocrdText.length > 0}">
         <div v-if="running == false" class="input-wrapper">
           <input id="file" @change="dropped" type="file" />
           <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
@@ -55,7 +54,7 @@
       return {
         running: false,
         ocrdText: '',
-        status: 'Waiting for file..',
+        status: 'Waiting for file',
         progress: 0,
         progressBar: {},
         paragraphs: [],
@@ -65,9 +64,9 @@
     },
     methods: {
       reset () {
+        // this.status = 'Waiting for file'
         this.ocrdText = ''
         this.paragraphs = []
-        this.status = ''
         this.progress = 0
         this.setWindowSize(true)
       },
@@ -75,7 +74,8 @@
         let _this = this
         let file = e.target.files[0].path
 
-        console.log('processing...', e.target.files[0])
+        this.status = 'Loading File'
+        this.reset()
 
         if (e.target.files[0].type.indexOf('image') == -1) {
           dialog.showMessageBox({
@@ -88,8 +88,6 @@
           return
         }
 
-        this.reset()
-        this.status = 'Starting...'
         this.running = true
         this.startProgressBar()
 
@@ -172,7 +170,7 @@
         setTimeout(function () {
           var window = remote.getCurrentWindow()
 
-          ipcRenderer.send('resizeWindow', [small ? 470 : 600, document.getElementsByTagName('html')[0].offsetHeight])
+          ipcRenderer.send('resizeWindow', [550, document.getElementsByTagName('html')[0].offsetHeight])
         }, 100)
       }
     },
@@ -222,6 +220,7 @@
   }
 
   .top-right button {
+    color: rgba(255, 255, 255, 0.5);
     font-size: 14px;
     cursor: pointer;
     border: 0px;
@@ -235,13 +234,11 @@
   }
 
   .top-right button:hover {
-    color: #e4e4e4;
+    color: white;
   }
 
   .drag-area {
     align-content: center;
-    border-radius: 8px;
-    border: 2px dashed rgba(255, 255, 255, 0.43);
     display: block;
     justify-content: center;
     margin: 20px 20px 10px;
@@ -255,7 +252,6 @@
     border-color: #60c0f5;
     color: #60c0f5;
     margin: 20px 18px 10px;
-    padding: 68px 20px;
   }
 
   .drag-area.running {
@@ -263,7 +259,7 @@
   }
 
   .drag-area.ran {
-    padding: 24px 20px;
+    padding: 40px 20px;
   }
 
   .drag-area input {
@@ -276,9 +272,11 @@
   }
 
   .result {
+    color: white;
     max-width: 100%;
-    padding: 200px 20px 20px 20px;
+    padding: 137px 20px 20px 20px;
     font-size: 12px;
+    font-family: Menlo, "Montserrat", sans-serif;
   }
 
   .result .normal {
@@ -297,15 +295,11 @@
   }
 
   html, .body {
-    background: #1b2429;
+    background: #27282e;
   }
 
   .top {
-    background: #1b2429;
-    color: white;
-  }
-
-  .result {
+    background: #27282e;
     color: white;
   }
 
@@ -334,10 +328,6 @@
     transition: all 0.25s ease;
   }
 
-  button:hover {
-    background: #28343c;
-  }
-
   #progress {
     height: 100px;
     margin: 0 auto;
@@ -346,10 +336,10 @@
   }
 
   .footer {
-    background: #1b2429;
-    bottom:6px;
+    background: #27282e;
+    bottom: 10px;
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 500;
     left: 0px;
     letter-spacing: 1px;
     position: fixed;
